@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <title>Hangman</title>
+
+        <style>
+            body {
+                font-family: Tahoma;
+            }
+            header {
+                margin: 0 auto;
+                text-align: center;
+            }
+            nav {}
+            section {
+                margin: auto;
+            }
+                section #word {
+                    margin: 0 auto;
+                    text-align: center;
+                }
+
+                section #word .letter {
+                    background-color: transparent;
+                    border: 0px transparent solid;
+                    border-bottom: 2px solid #000000;
+                    font-size: 2em;
+                    width: 1em;
+                    margin: 0 0.1em;
+                    text-align: center;
+                }
+
+                section #image {
+                    position: relative;
+                    margin: 2em auto 0;
+                    font-family: 'Courier New', Courier, monospace;
+                    white-space: pre;
+                    height: 16eH;
+                    border: 0px transparent solid;
+                    width: 17em;
+                    font-size: 2em;
+                }
+            aside {
+                margin: 4em auto 0;
+                text-align: center;
+                color: rgba(80,80,80,0.6);
+            }
+                aside #used {
+                    margin: 0 auto;
+                    text-align: center;
+                    color: rgba(80,80,80,0.9);
+                }
+            footer {
+                display: none;
+                text-align: center;
+                margin: 0 auto;
+            }
+        </style>
+    </head>
+    <body>
+
+        <header>
+            <h1>Hangman</h1>
+        </header>
+
+        <nav></nav>
+        
+        <section>
+            <div id="word">
+
+            </div>
+            <div id="image">
+
+            </div>
+        </section>
+        
+        <aside>
+            Benutze Buchstaben:
+            <div id="used">
+
+            </div>
+        </aside>
+        
+        <footer>
+            &copy; 2019
+        </footer>
+
+        <!-- Last content line - only script after this comment -->
+        <script>
+            window.onload = function () {
+
+                const word = "TEST";
+
+                var charactersUsed = [];
+
+                const Image = {
+                    stages: 12,
+                    currentStage: 0,
+                    elements: [ `
+                    
+                    
+
+                    
+
+                    
+                    `, `              
+                    
+                    
+                    
+                    
+  _____________
+ /             \\
+/               \\`, `    |
+    | 
+    |	 
+    |   
+    |    
+  __|__________
+ /             \\
+/               \\`, `    |
+    |   
+    |	 
+    |    
+    |   
+  __|\\_________
+ /             \\
+/               \\`, `    +-------
+    |     
+    |	   
+    |    
+    |     
+  __|\\_________
+ /             \\
+/               \\`, `    +------+
+    |      |
+    |	   
+    |     
+    |    
+  __|\\_________
+ /             \\
+/               \\`, `    +------+
+    |      |
+    |	   o
+    |  
+    |   
+  __|\\_________
+ /             \\
+/               \\`, `    +------+
+    |      |
+    |	   o
+    |      O
+    |  
+  __|\\_________
+ /             \\
+/               \\`, `    +------+
+    |      |
+    |	   o
+    |     /O
+    |     
+  __|\\_________
+ /             \\
+/               \\`, `    +------+
+    |      |
+    |	   o
+    |     /O\\
+    |   
+  __|\\_________
+ /             \\
+/               \\`, `    +------+
+    |      |
+    |	   o
+    |     /O\\
+    |     /
+  __|\\_________
+ /             \\
+/               \\`, `    +------+
+    |      |
+    |	   o
+    |     /O\\
+    |     / \\
+  __|\\_________
+ /             \\
+/               \\` ],
+                    getCurrentImage() {
+                        //console.log(this.currentStage);
+                        //console.log(this.elements[this.currentStage]);
+                        return this.elements[this.currentStage];
+                    },
+                    getNextImage() {
+                        if (this.currentStage + 1 > this.stages - 1) {
+                            console.log("Not possible no more image elements");
+                        } else {
+                            this.currentStage++;
+                        }
+                        return this.getCurrentImage();
+                    },
+                    setGuiImage(id, next = false) {
+                        var guiElement = window.document.getElementById(id);
+                        if (guiElement != undefined) {
+                            if (next)
+                                guiElement.innerHTML = this.getNextImage();
+                            else
+                                guiElement.innerHTML = this.getCurrentImage();
+                        }
+                    }
+                }
+
+                var img = Object.create(Image); 
+
+                function init() {
+                    var wordContainer = window.document.getElementById("word");
+                    if (wordContainer != undefined) {
+                        for (var i = 0; i < word.length; i++) {
+                            var newInput = window.document.createElement("input");
+                            var letterAttribute = window.document.createAttribute("class");
+                            letterAttribute.value = "letter " + word.charAt(i).toUpperCase();
+                            newInput.setAttributeNode(letterAttribute);
+                            wordContainer.appendChild(newInput);
+                        }
+                    }
+                    img.setGuiImage("image");
+                }
+
+                function updateCharUsed() {
+                    var used = window.document.getElementById("used");
+                    used.innerHTML = charactersUsed.join(", ");
+                }
+
+                function keyEvents() {
+                    if (window.addEventListener) 
+                        window.addEventListener("keydown", keycodes, false);
+                    else if (window.attachEvent) 
+                        window.attachEvent("onkeydown", keycodes);
+                    
+                    function keycodes (event) {
+                        if (event.keyCode >= 65 && event.keyCode <= 90 && !event.ctrlKey && !event.altKey) {
+                                
+                                // Stop event propagation
+                                event.preventDefault();
+
+                                var key = event.key.toUpperCase();
+
+                                if ( word.toUpperCase().indexOf(key) != -1              // Found in the word
+                                        &&  charactersUsed.indexOf(key) == -1 ) {       // and not in the allready used letter
+
+                                    var inputs = window.document.getElementsByClassName(key);
+                                    for (var i = 0; i < inputs.length; i++) {
+                                        inputs[i].value = key;
+                                    }
+
+                                    charactersUsed.push(key);
+                                    updateCharUsed();
+                                    
+                                } else if (word.toUpperCase().indexOf(key) == -1        // Not in the word
+                                        && charactersUsed.indexOf(key) == -1) {         // and not in the allready used letter
+                                    
+                                    img.setGuiImage("image", true);
+
+                                    charactersUsed.push(key);
+                                    updateCharUsed();   
+                                }
+                                
+                        } else {
+                            console.log ("No char key pressed")
+                        }
+                    }
+                }
+
+                init();
+                keyEvents();
+
+            };
+        </script>
+    </body>
+</html>
